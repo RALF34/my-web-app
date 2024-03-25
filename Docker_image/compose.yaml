@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build: frontend
+    ports:
+      - 8501:8501
+    depends_on:
+      - backend
+  backend:
+    build: backend
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+  database:
+    build: database
+    ports:
+      - 8081:27017
