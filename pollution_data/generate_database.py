@@ -1,4 +1,3 @@
-import time
 from datetime import date, datetime, timedelta
 
 from pandas import DataFrame, read_csv, read_excel
@@ -53,7 +52,7 @@ def store_locations() -> None:
     database["LCSQA_stations"].insert_many(data.to_dict("records"))
     
     
-def store_pollution_data(n_days, update: bool = False) -> None:
+def store_pollution_data() -> None:
     '''
     Create two collections storing hourly average concentrations of 
     air pollutants recorded on working days and weekends.
@@ -64,7 +63,7 @@ def store_pollution_data(n_days, update: bool = False) -> None:
               storing the pollution data.
     '''
 
-    d = date.today() - timedelta(days=n_days)
+    d = date.today() - timedelta(days=180)
     # Iterate over each day until the current day.
     while d < date.today():
         url = "https://files.data.gouv.fr/lcsqa/concentrations-de"+\
@@ -118,7 +117,7 @@ def store_pollution_data(n_days, update: bool = False) -> None:
     database.drop_collection("LCSQA_data")
 
 
-def create_database() -> None:
+def generate_database() -> None:
     '''
     Create the "air quality" MongoDB database comprised of
     the following collections:
@@ -157,7 +156,7 @@ def create_database() -> None:
 
     database.drop_collection("LCSQA_stations")    
     
-    store_pollution_data(7)
+    store_pollution_data()
     # Create the "distribution_pollutants" collection giving, for
     # each station, the pollutant(s) whose air concentration is 
     # being recorded.
@@ -189,3 +188,6 @@ def create_database() -> None:
     database["last_update"].insert_one(
         {"date": datetime(
             d.year, d.month, d.day)-timedelta(days=1)})
+        
+if __name__=="__main__":
+    generate_database()
