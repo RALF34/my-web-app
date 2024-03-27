@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from pandas import DataFrame, read_csv, read_excel
 from pymongo import MongoClient
 
-from .constants import FRENCH_DEPARTMENTS
+from constants import FRENCH_DEPARTMENTS
 
 mongoClient = MongoClient()
 database = mongoClient["air_quality"]
@@ -84,7 +84,7 @@ def store_pollution_data() -> None:
                 lambda x: x in ["NO","NOX as NO2","C6H6","O3"])
             data = data[data["pollutant_to_ignore"]==False]
             data["dateTime"] = data["Date de début"].apply(
-                lambda x: stringToDatetime(x))
+                lambda x: string_to_datetime(x))
             data["hour"] = data["dateTime"].apply(
                 lambda x: x.hour)
             data["working_day"] = data["dateTime"].apply(
@@ -103,16 +103,13 @@ def store_pollution_data() -> None:
         # Move on to the following day.
         d += timedelta(days=1)
     # Split the "LCSQA_data" collection into two collections
-    # (named differently depending on whether being on an update
-    # or not) to separate the data recorded on working days from those
+    # to separate the data recorded on working days from those
     # recorded on weekends.
-    names = ("working_days","weekends") if not(update) \
-    else ("new_working_days", "new_weekends")
     for document in database["LCSQA_data"].find():
         if document["working_day"]:
-            database[names[0]].insert_one(document)
+            database["working_days"].insert_one(document)
         else:
-            database[names[1]].insert_one(document)
+            database["weekends"].insert_one(document)
     
     database.drop_collection("LCSQA_data")
 
