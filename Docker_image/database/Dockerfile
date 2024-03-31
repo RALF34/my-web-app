@@ -1,7 +1,9 @@
 FROM mongo:latest
 
-COPY . /data
+COPY . .
+
+RUN chmod +x commands.sh
 
 EXPOSE 27017
 
-CMD mongod
+CMD ./commands.sh
